@@ -34,30 +34,49 @@ import fs from 'fs';
   //! END @TODO1
   app.get('/filteredImage', async (req, res) => {
     const target_url: string = req.query.image_url;
-    if (!target_url) {
-      res.send('please provide query parameter image_url')
-    } else {
-
-      try {
-        const filteredImagePath = await filterImageFromURL(target_url);
-        if (fs.existsSync(filteredImagePath)) {
-          res.sendFile(filteredImagePath, null, () => deleteLocalFiles([filteredImagePath]));
-        } else {
-          throw ("Whoops, couldn't get the file right. Try again.")
-        }
-      } catch (e) {
-        const errMsg: string = e.toString();
-        const statusCode: number = 500;
-
-        res
-          .status(statusCode)
-          .end(
-            errMsg.includes("MIME") ?
-              `${e.toString()}\nPlease try again with a supported MIME type, e.g. "png", "jpeg"` :
-              errMsg
-          );
-
+    let
+      filteredImagePath: string = null,
+      response = {
+        msg: "",
+        statusCode: 200,
+        successful: true
       }
+
+    function setResponse(successful: boolean, status: number, msg: string) {
+      response.statusCode = status;
+      response.msg = msg;
+      response.successful = successful;
+    }
+
+    if (!target_url) {
+      setResponse(false, 200, 'please provide query parameter image_url')
+    } else {
+      try {
+        filteredImagePath = await filterImageFromURL(target_url);
+        if (!fs.existsSync(filteredImagePath)) setResponse(false, 404, 'Not found');
+      } catch (err) {
+        const e: string = err.toString();
+        setResponse(
+          false,
+          500,
+          e.includes("MIME") ?
+            `${e}\nPlease try again with a supported MIME type, e.g. "png", "jpeg"` :
+            e);
+      }
+    }
+
+    if (response.successful) {
+      res
+        .status(response.statusCode)
+        .sendFile(
+          filteredImagePath,
+          null,
+          () => deleteLocalFiles([filteredImagePath])
+        );
+    } else {
+      res
+        .status(response.statusCode)
+        .end(response.msg);
     }
   });
 
