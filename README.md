@@ -8,6 +8,6 @@ content for Udacity's cloud developer nanodegree
 Test link after deployment:
 http://eb-first-test-dev3.eu-central-1.elasticbeanstalk.com/filteredimage?image_url=https://upload.wikimedia.org/wikipedia/commons/b/bd/Golden_tabby_and_white_kitten_n01.jpg
 
-Screenshot of the dashboard is the following:
+Screenshot of the dashboard is following:
 
-![Screenshot](Screenshot_EB_Dashboard.png)
+![Screenshot](https://github.com/gtugnolo/cloud-developer/blob/master/course-02/project/image-filter-starter-code/Screenshot_EB_Dashboard.png)
