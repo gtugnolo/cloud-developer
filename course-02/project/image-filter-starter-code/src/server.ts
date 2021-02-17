@@ -37,24 +37,26 @@ import fs from 'fs';
     if (!target_url) {
       res.send('please provide query parameter image_url')
     } else {
-      if (
-        !target_url.includes("png") &&
-        !target_url.includes("jpg") &&
-        !target_url.includes("jpeg")
-      ) {
-        res.end(`please provide a supported MIME type: "png", "jpg", "jpeg"`)
-      } else {
 
-        try {
-          const filteredImagePath = await filterImageFromURL(target_url);
-          if (fs.existsSync(filteredImagePath)) {
-            res.sendFile(filteredImagePath, null, () => deleteLocalFiles([filteredImagePath]));
-          } else {
-            throw ("Whoops, couldn't get the file right. Try again.")
-          }
-        } catch (e) {
-          res.status(500).end(e);
+      try {
+        const filteredImagePath = await filterImageFromURL(target_url);
+        if (fs.existsSync(filteredImagePath)) {
+          res.sendFile(filteredImagePath, null, () => deleteLocalFiles([filteredImagePath]));
+        } else {
+          throw ("Whoops, couldn't get the file right. Try again.")
         }
+      } catch (e) {
+        const errMsg: string = e.toString();
+        const statusCode: number = 500;
+
+        res
+          .status(statusCode)
+          .end(
+            errMsg.includes("MIME") ?
+              `${e.toString()}\nPlease try again with a supported MIME type, e.g. "png", "jpeg"` :
+              errMsg
+          );
+
       }
     }
   });
